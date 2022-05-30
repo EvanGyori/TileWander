@@ -1,1 +1,1 @@
-Made when I was very young using code blocks and was my first time using C++ after only have used javascript, looking at the comments I left, I described what each type of variable did and kept doing very repetitive things.
+First C++ project
