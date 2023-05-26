@@ -37,10 +37,29 @@ int OPS;
 float HP[2];
 
 char player = 43;
-char empty = 35;
+char empty = 176;
 char loot = 36;
 
 bool DD;
+
+void clear()
+{
+	#ifdef _WIN32
+	system("cls");
+	#else
+	system("clear");
+	#endif
+}
+
+void pause()
+{
+	#ifdef _WIN32
+	system("pause");
+	#else
+	cout << "\nPress enter to continue...\n";
+	system("read");
+	#endif
+}
 
 string shieldName (int id) {
   switch(id) {
@@ -150,9 +169,9 @@ float additionStat(int id, int stat) {
   switch (id) {
     case 100:
       switch(stat) {
-        case 0: return 0.8; break;
-        case 1: return 1; break;
-        case 2: return 1.1; break;
+        case 0: return 0.8; break; //Damage
+        case 1: return 1; break; // multiplier
+        case 2: return 1.1; break; // chance
       }
       break;
     case 101:
@@ -262,13 +281,13 @@ float weaponStat(int id, int stat) {
     case 0: //Basic Sword
       switch(stat) {
         case 0:
-          return 6;
+          return 6; // damage
           break;
         case 1:
-          return 2;
+          return 2; // Brutal Multiplier
           break;
         case 2:
-          return 25;
+          return 25; // Brutal Chance
           break;
       }
       break;
@@ -451,7 +470,7 @@ int randNumber(int min = 0, int max = 1) {
 }
 int tiles[100000][9]; // 0 x, 1 y, 2 id, 3 current hp, 4 max hp, 5 attack dmg, 6 teir loot, 7 loot type, 8 attack engaged <for defenders
 int tileLength = 0;
-int newTile(int x, int y, bool isRand = true, int id = 0) {
+void newTile(int x, int y, bool isRand = true, int id = 0) {
   if (isRand == true) {
     if (randNumber(1, 10) <= 1 && DD == true) {
       id = randNumber(0, 4);
@@ -488,7 +507,7 @@ int newTile(int x, int y, bool isRand = true, int id = 0) {
   }
   tileLength++;
 }
-int tilePlayer() {
+void tilePlayer() {
   bool INT = false; bool IST = false; bool IWT = false; bool IET = false;
   for (int i = 0; i < tileLength; i++) {
     //Checks for tiles north, south, west and east of player
@@ -539,7 +558,7 @@ float determineStat(int weaponID, int statID, int stat) {
   }
 }
 float dmgAverage(int weaponID, int statID) {
-  return ( ( determineStat(weaponID, statID, 0) * determineStat(weaponID, statID, 1) ) - determineStat(weaponID, statID, 0) )
+  return ( ( determineStat(weaponID, statID, 0) * determineStat(weaponID, statID, 1) ) - determineStat(weaponID, statID, 0) )// (dmg * brutal dmg - dmg) * (brutal chance /100) + dmg
   * (determineStat(weaponID, statID, 2)/100) + determineStat(weaponID, statID, 0);
 }
 float determineAttack(int weaponID, int statID) {
@@ -554,12 +573,12 @@ char MC(int x, int y) {
   for (int i = 0; i < tileLength; i++) {
     if (tiles[i][0] == x && tiles[i][1] == y) {
       generatedTile = true;
-      if (tiles[i][2] == 0) { return 35; } else if (tiles[i][2] == 1) { return 36; }
-      else if (tiles[i][2] == 2) { return 33; } else if (tiles[i][2] == 3 && tiles[i][8] == false) { return 68; }
+      if (tiles[i][2] == 0) { return 176; } else if (tiles[i][2] == 1) { return 36; }
+      else if (tiles[i][2] == 2) { return 178; } else if (tiles[i][2] == 3 && tiles[i][8] == false) { return 68; }
       else if (tiles[i][2] == 3 && tiles[i][8] == true) { return 69; } else if (tiles[i][2] == 4) { return 37; }
     }
   }
-  if (generatedTile == false) { return 63; }
+  if (generatedTile == false) { return 32; }
 }
 void mapDisplay() {
   //Display a map for the player
@@ -590,7 +609,7 @@ void mapDisplay() {
   << endl << MC(PC[0]-4,PC[1]+4) << MC(PC[0]-3,PC[1]+4) << MC(PC[0]-2,PC[1]+4) << MC(PC[0]-1,PC[1]+4)
   << MC(PC[0],PC[1]+4) << MC(PC[0]+1,PC[1]+4) << MC(PC[0]+2,PC[1]+4) << MC(PC[0]+3,PC[1]+4) << MC(PC[0]+4,PC[1]+4);
 }
-int currentTileStatus() {
+void currentTileStatus() {
   for (int i = 0; i < tileLength; i++) {
     if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) {
       CTT = tiles[i][2];
@@ -673,7 +692,7 @@ int itemStat(int id) {
   }
 }
 void displayInv() {
-  system("clear");
+  clear();
   cout << "1: " << inventoryID(PII[0]) << "\n2: " << inventoryID(PII[1]) << "\n3: " << inventoryID(PII[2]) << "\n4: " << inventoryID(PII[3])
   << "\n5: " << inventoryID(PII[4]) << "\n6: " << inventoryID(PII[5]) << "\n7: " << inventoryID(PII[6]) << "\n8: " << inventoryID(PII[7])
   << "\n9: " << inventoryID(PII[8]) << "\n10: " << inventoryID(PII[9]) << endl << name << "s HP " << HP[0] << "/" << HP[1] << "\nCurrent Weapon: " << statName(CAI) << " "
@@ -765,18 +784,19 @@ int main()
     srand( time(0) );
     cout << "seed: " << time(0) << endl;
 
-    cout << "Hello Player" << "\nPress enter to continue...\n";
-    system("read");
-    system("clear");
+    cout << "Hello Player\n";
+    pause();
+    clear();
     cout << "What is your name: ";
     //cin or console input is what the user types into the console and >> is used to take out the input and put it into the input variable i created
     cin >> name;
-    system("clear");
-    cout << "Hello " << name << "\nPress enter to continue...\n";
-    system("read");
+    clear();
+    system("color 07");
+    cout << "Hello " << name << endl;
+    pause();
     //do while command repeats code until while statement is false
     do {
-      system("clear");
+      clear();
       //Player picks starting weapon
       cout << "Pick a weapon\nq: Basic Sword <" << determineStat(0, 102, 0) << " Dmg, " << determineStat(0, 102, 1)
       << "x BrutalDmg, " << determineStat(0, 102, 2) << " Brutal Luck, " << dmgAverage(0, 102) << " Average Dmg>\nw: Basic Dagger <"
@@ -790,18 +810,18 @@ int main()
     } while(input != "q" && input != "w" && input != "a" && input != "s");
     if (input == "q") { CWI = II[0]; } else if (input == "w") { CWI = II[1]; } else if (input == "a") { CWI = II[2]; } else { CWI = II[3]; }
     CAI = randNumber(STAT_ID_MINMAX[0], STAT_ID_MINMAX[1]);
-    system("clear");
+    clear();
     cout << "You picked a " << weaponName(CWI) << " with stat " << statName(CAI) << endl << "Damage: " << determineStat(CWI, CAI, 0) <<
     endl << "Brutal Damage Multiplier: " << determineStat(CWI, CAI, 1) << endl << "Brutal Hit Luck: " << determineStat(CWI, CAI, 2)
-    << "\nAverage Damage: " << dmgAverage(CWI, CAI) << "\n\nRecieved wooden shield\nPress enter to continue...\n";
-    system("read");
-    system("clear");
+    << "\nAverage Damage: " << dmgAverage(CWI, CAI) << "\n\nRecieved wooden shield\n";
+    pause();
+    clear();
     newTile(0, 0, false, 0);
-    cout << "Good Luck!\nPress enter to continue...\n";
-    system("read");
+    cout << "Good Luck\n";
+    pause();
     do { //DO WHILE START <-----------------------------
         do {
-          system("clear");
+          clear();
           tilePlayer();
           currentTileStatus();
 
@@ -894,17 +914,17 @@ int main()
               OPWS = -1;
               for (int i = 0; i < tileLength; i++) { if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) { tiles[i][2] = 0; } }
             } else if (input == "v") {
-              system("clear");
+              clear();
               cout << "Current Weapon: " << statName(CAI) << " " << weaponName(CWI) << " <" << determineStat(CWI, CAI, 0) << " Dmg, "
               << determineStat(CWI, CAI, 1) << "x BrutalDmg, " << determineStat(CWI, CAI, 2) << " Brutal Luck, "
               << dmgAverage(CWI, CAI) << " Average Dmg>\n\nScavanged Weapon: " << statName(OPWS) << " " << weaponName(OPW)
               << " <" << determineStat(OPW, OPWS, 0) << " Dmg, " << determineStat(OPW, OPWS, 1) << "x BrutalDmg, "
-              << determineStat(OPW, OPWS, 2) << " Brutal Luck, " << dmgAverage(OPW, OPWS) << " Average Dmg>\n\nPress enter to continue...\n";
-              system("read");
+              << determineStat(OPW, OPWS, 2) << " Brutal Luck, " << dmgAverage(OPW, OPWS) << " Average Dmg>\n\n";
+              pause();
             } else {
-              system("clear");
-              cout << "Invalid Input.\nPress enter to continue...\n";
-              system("read");
+              clear();
+              cout << "Invalid Input\n";
+              pause();
             }
           } else if (CTLT[1] == 2) {
             if (input=="w"||input=="a"||input=="s"||input=="d") {
@@ -924,14 +944,14 @@ int main()
               OPS = -1;
               for (int i = 0; i < tileLength; i++) { if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) { tiles[i][2] = 0; } }
             } else if (input == "v") {
-              system("clear");
+              clear();
               cout << "Current Shield: " << shieldName(CSI) << " <" << shieldStat(CSI, 0) << " Deflect Luck, "
               << shieldStat(CSI, 1) << " Deflect Percentage>\n\nScavanged Shield: " << shieldName(OPS) << " <"
-              << shieldStat(OPS, 0) << " Deflect Luck, " << shieldStat(OPS, 1) << " Deflect Percentage>\n\nPress enter to continue...\n";
-              system("read");
+              << shieldStat(OPS, 0) << " Deflect Luck, " << shieldStat(OPS, 1) << " Deflect Percentage>\n\n";
+              pause();
             } else {
-              cout << "Invalid Input.\nPress enter to continue...\n";
-              system("read");
+              cout << "Invalid Input\n";
+              pause();
             }
           } else if (CTLT[1] == 3) {
               if(input=="1") {PII[0] = OPI; OPI = -1;} else
@@ -946,9 +966,9 @@ int main()
               if(input=="10") {PII[9] = OPI; OPI = -1;} else
               if(input=="t") {OPI = -1;}
               else {
-                system("clear");
-                cout << "Invalid Input.\nPress enter to continue...\n";
-                system("read");
+                clear();
+                cout << "Invalid Input\n";
+                pause();
               }
               if (input=="1"||input=="2"||input=="3"||input=="4"||input=="5"||input=="6"
               ||input=="7"||input=="8"||input=="9"||input=="10"||input=="t") {
@@ -958,14 +978,14 @@ int main()
           }
 
         } else if (CTT == 2) {//Attack tile
-          system("clear");
+          clear();
           if (input == "r") {
-            cout << "Tile deals " << CTAD << " dmg\nPress enter to continue...\n";
+            cout << "Tile deals " << CTAD << " dmg\n";
             HP[0] -= CTAD;
-            system("read");
+            pause();
             if (HP[0] > 0) {
               do {
-                system("clear");
+                clear();
                 mapDisplay();
                 cout << endl << name << "s HP: " << HP[0] << "/" << HP[1] << "\nw: North, " << tileType(NT[2]) << "\na: West, "
                 << tileType(WT[2]) << "\ns: South, " << tileType(ST[2]) << "\nd: East, " << tileType(ET[2]) << "\nX: "
@@ -978,16 +998,16 @@ int main()
               if (input == "d") { PC[0]++; }
             }
           } else if (input == "f") {
-            system("clear");
+            clear();
             float P_DMG = determineAttack(CWI, CAI); // Player Damage
             for (int i = 0; i < tileLength; i++) { if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) { tiles[i][3] -= P_DMG; } }
             currentTileStatus();
             if (CTHP[0] > 0) {
               float E_DMG = CTAD * shieldAction(CSI); // Enemy Damage
-              cout << "You deal " << P_DMG << " dmg\nTile deals " << E_DMG << " dmg\nPress enter to continue...\n";
+              cout << "You deal " << P_DMG << " dmg\nTile deals " << E_DMG << " dmg\n";
               HP[0] -= E_DMG;
             } else {
-              cout << "You deal " << P_DMG << " dmg\nYou've defeated the tile\nPress enter to continue...\n";
+              cout << "You deal " << P_DMG << " dmg\nYou've defeated the tile\n";
               for (int i = 0; i < tileLength; i++) {
                 if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) {
                   if (randNumber(1, 4) <= 3) {
@@ -1002,31 +1022,31 @@ int main()
                 }
               }
             }
-            system("read");
+            pause();
           } else if (input == "q") {
             inventory();
-            system("clear");
-            cout << "Tile deals " << CTAD << " dmg\nPress enter to continue...\n";
+            clear();
+            cout << "Tile deals " << CTAD << " dmg\n";
             HP[0] -= CTAD;
-            system("read");
+            pause();
           } else {
-            system("clear");
-            cout << "Invalid Input.\nPress enter to continue...\n";
-            system("read");
+            clear();
+            cout << "Invalid Input.\n";
+            pause();
           }
         } else if (CTT == 3) { //Defender tile
-          system("clear");
+          clear();
           if (input == "w" && CTEI[0] == false) { PC[1]--; } else
           if (input == "a" && CTEI[0] == false) { PC[0]--; } else
           if (input == "s" && CTEI[0] == false) { PC[1]++; } else
           if (input == "d" && CTEI[0] == false) { PC[0]++; }
           else if (input == "r" && CTEI[0] == true) {
-            cout << "Tile deals " << CTAD << " dmg\nPress enter to continue...\n";
+            cout << "Tile deals " << CTAD << " dmg\n";
             HP[0] -= CTAD;
-            system("read");
+            pause();
             if (HP[0] > 0) {
               do {
-                system("clear");
+                clear();
                 mapDisplay();
                 cout << endl << name << "s HP: " << HP[0] << "/" << HP[1] << "\nw: North, " << tileType(NT[2]) << "\na: West, "
                 << tileType(WT[2]) << "\ns: South, " << tileType(ST[2]) << "\nd: East, " << tileType(ET[2]) << "\nX: "
@@ -1041,10 +1061,10 @@ int main()
           } else if (input == "q") {
             if (CTEI[0] == true) {
               inventory();
-              system("clear");
-              cout << "Tile deals " << CTAD << " dmg\nPress enter to continue...\n";
+              clear();
+              cout << "Tile deals " << CTAD << " dmg\n";
               HP[0] -= CTAD;
-              system("read");
+              pause();
             } else {
               inventory(true);
             }
@@ -1054,13 +1074,13 @@ int main()
             for (int i = 0; i < tileLength; i++) { if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) { tiles[i][3] -= P_DMG; } }
             currentTileStatus();
             if (CTHP[0] > 0) {
-              cout << "You deal " << P_DMG << " dmg\nTile deals " << E_DMG << " dmg\nPress enter to continue...\n";
+              cout << "You deal " << P_DMG << " dmg\nTile deals " << E_DMG << " dmg\n";
               HP[0] -= E_DMG;
               for (int i = 0; i < tileLength; i++) { if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) { tiles[i][8] = true; } }
-              system("read");
+              pause();
             } else {
               DD = true;
-              cout << "You deal " << P_DMG << " dmg\nYou've defeated the tile\nPress enter to continue...\n";
+              cout << "You deal " << P_DMG << " dmg\nYou've defeated the tile\n";
               for (int i = 0; i < tileLength; i++) {
                 if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) {
                   tiles[i][2] = 1;
@@ -1073,23 +1093,23 @@ int main()
                   }
                 }
               }
-              system("read");
+              pause();
             }
           }
         } else if (CTT = 4) {
-          system("clear");
+          clear();
           if (input == "f") {
             float P_DMG = determineAttack(CWI, CAI);
             float E_DMG = CTAD * shieldAction(CSI);
             for (int i = 0; i < tileLength; i++) { if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) { tiles[i][3] -= P_DMG; } }
             currentTileStatus();
             if (CTHP[0] > 0) {
-              cout << "You deal " << P_DMG << " dmg\nTile deals " << E_DMG << " dmg\nPress enter to continue...\n";
+              cout << "You deal " << P_DMG << " dmg\nTile deals " << E_DMG << " dmg\n";
               HP[0] -= E_DMG;
               for (int i = 0; i < tileLength; i++) { if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) { tiles[i][8] = true; } }
-              system("read");
+              pause();
             } else {
-              cout << "You deal " << P_DMG << " dmg\nYou've defeated the tile\nPress enter to continue...\n";
+              cout << "You deal " << P_DMG << " dmg\nYou've defeated the tile\n";
               for (int i = 0; i < tileLength; i++) {
                 if (tiles[i][0] == PC[0] && tiles[i][1] == PC[1]) {
                   tiles[i][2] = 1;
@@ -1109,21 +1129,21 @@ int main()
             }
           } else if (input == "q") {
             inventory();
-            system("clear");
-            cout << "Tile deals " << CTAD << " dmg\nPress enter to continue...\n";
+            clear();
+            cout << "Tile deals " << CTAD << " dmg\n";
             HP[0] -= CTAD;
-            system("read");
+            pause();
           } else {
-            system("clear");
-            cout << "Invalid Input.\nPress enter to continue...\n";
-            system("read");
+            clear();
+            cout << "Invalid Input.\n";
+            pause();
           }
         }
     } while(HP[0] > 0);
     do {
-        system("clear");
+        clear();
         cout << "Oh, looks like you died...\n";
-        system("read");
+        pause();
     } while(true);
     //Returns 0 when main function is over to return that it is complete
     return 0;
