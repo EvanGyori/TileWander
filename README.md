@@ -24,3 +24,5 @@ cmake <project-source-directory>
 cmake --build .
 ```
 Creates an executable called `TileWander`.
+
+Controls are shown below the map. For example, type in w and hit enter to move up.
